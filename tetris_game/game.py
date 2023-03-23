@@ -1,6 +1,6 @@
 import pygame
 import random
-
+# testing
 colors = [
     (0, 0, 0),
     (120, 37, 179),
@@ -52,7 +52,7 @@ class Tetris:
         self.y = 60
         self.zoom = 20
         self.figure = None
-    
+
         self.height = height
         self.width = width
         self.field = []
@@ -109,7 +109,8 @@ class Tetris:
         for i in range(4):
             for j in range(4):
                 if i * 4 + j in self.figure.image():
-                    self.field[i + self.figure.y][j + self.figure.x] = self.figure.color
+                    self.field[i + self.figure.y][j +
+                                                  self.figure.x] = self.figure.color
         self.break_lines()
         self.new_figure()
         if self.intersects():
@@ -179,14 +180,15 @@ while not done:
                 game.__init__(20, 10)
 
     if event.type == pygame.KEYUP:
-            if event.key == pygame.K_DOWN:
-                pressing_down = False
+        if event.key == pygame.K_DOWN:
+            pressing_down = False
 
     screen.fill(WHITE)
 
     for i in range(game.height):
         for j in range(game.width):
-            pygame.draw.rect(screen, GRAY, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
+            pygame.draw.rect(screen, GRAY, [
+                             game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
             if game.field[i][j] > 0:
                 pygame.draw.rect(screen, colors[game.field[i][j]],
                                  [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
@@ -198,7 +200,8 @@ while not done:
                 if p in game.figure.image():
                     pygame.draw.rect(screen, colors[game.figure.color],
                                      [game.x + game.zoom * (j + game.figure.x) + 1,
-                                      game.y + game.zoom * (i + game.figure.y) + 1,
+                                      game.y + game.zoom *
+                                      (i + game.figure.y) + 1,
                                       game.zoom - 2, game.zoom - 2])
 
     font = pygame.font.SysFont('Calibri', 25, True, False)

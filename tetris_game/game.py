@@ -1,5 +1,6 @@
 import pygame
 import random
+import numpy as np
 # testing
 colors = [
     (0, 0, 0),
@@ -17,13 +18,13 @@ class Figure:
     y = 0
 
     figures = [
-        [[1, 5, 9, 13], [4, 5, 6, 7]],
-        [[4, 5, 9, 10], [2, 6, 5, 9]],
-        [[6, 7, 9, 10], [1, 5, 6, 10]],
-        [[1, 2, 5, 9], [0, 4, 5, 6], [1, 5, 9, 8], [4, 5, 6, 10]],
-        [[1, 2, 6, 10], [5, 6, 7, 9], [2, 6, 10, 11], [3, 5, 6, 7]],
-        [[1, 4, 5, 6], [1, 4, 5, 9], [4, 5, 6, 9], [1, 5, 6, 9]],
-        [[1, 2, 5, 6]],
+        [np.array([1, 5, 9, 13]), np.array([4, 5, 6, 7])],
+        [np.array([4, 5, 9, 10]), np.array([2, 6, 5, 9])],
+        [np.array([6, 7, 9, 10]), np.array([1, 5, 6, 10])],
+        [np.array([1, 2, 5, 9]), np.array([0, 4, 5, 6]), np.array([1, 5, 9, 8]), np.array([4, 5, 6, 10])],
+        [np.array([1, 2, 6, 10]), np.array([5, 6, 7, 9]), np.array([2, 6, 10, 11]), np.array([3, 5, 6, 7])],
+        [np.array([1, 4, 5, 6]), np.array([1, 4, 5, 9]), np.array([4, 5, 6, 9]), np.array([1, 5, 6, 9])],
+        [np.array([1, 2, 5, 6])],
     ]
 
     def __init__(self, x, y):
@@ -36,8 +37,8 @@ class Figure:
     def image(self):
         return self.figures[self.type][self.rotation]
 
-    def rotate(self):
-        self.rotation = (self.rotation + 1) % len(self.figures[self.type])
+    def rotate(self, r):
+        self.rotation = r
 
 
 class Tetris:
@@ -55,14 +56,9 @@ class Tetris:
 
         self.height = height
         self.width = width
-        self.field = []
+        self.field = np.zeros((height, width))
         self.score = 0
         self.state = "start"
-        for i in range(height):
-            new_line = []
-            for j in range(width):
-                new_line.append(0)
-            self.field.append(new_line)
 
     def new_figure(self):
         self.figure = Figure(3, 0)
@@ -122,9 +118,9 @@ class Tetris:
         if self.intersects():
             self.figure.x = old_x
 
-    def rotate(self):
+    def rotate(self, r):
         old_rotation = self.figure.rotation
-        self.figure.rotate()
+        self.figure.rotate(r)
         if self.intersects():
             self.figure.rotation = old_rotation
 
@@ -149,8 +145,6 @@ fps = 25
 game = Tetris(20, 10)
 counter = 0
 
-pressing_down = False
-
 while not done:
     if game.figure is None:
         game.new_figure()
@@ -158,30 +152,13 @@ while not done:
     if counter > 100000:
         counter = 0
 
-    if counter % (fps // game.level // 2) == 0 or pressing_down:
+    if counter % (fps // game.level // 2) == 0:
         if game.state == "start":
             game.go_down()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                game.rotate()
-            if event.key == pygame.K_DOWN:
-                pressing_down = True
-            if event.key == pygame.K_LEFT:
-                game.go_side(-1)
-            if event.key == pygame.K_RIGHT:
-                game.go_side(1)
-            if event.key == pygame.K_SPACE:
-                game.go_space()
-            if event.key == pygame.K_ESCAPE:
-                game.__init__(20, 10)
-
-    if event.type == pygame.KEYUP:
-        if event.key == pygame.K_DOWN:
-            pressing_down = False
 
     screen.fill(WHITE)
 
@@ -190,7 +167,7 @@ while not done:
             pygame.draw.rect(screen, GRAY, [
                              game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
             if game.field[i][j] > 0:
-                pygame.draw.rect(screen, colors[game.field[i][j]],
+                pygame.draw.rect(screen, colors[int(game.field[i][j])],
                                  [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
 
     if game.figure is not None:

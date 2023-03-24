@@ -124,6 +124,8 @@ class Tetris:
         if self.intersects():
             self.figure.rotation = old_rotation
 
+    # Need to create: bumpiness, complete lines, aggregate height, holes, next_states
+
 
 # Initialize the game engine
 pygame.init()

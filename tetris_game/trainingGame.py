@@ -252,7 +252,7 @@ def computeFitness(AIList, rounds, moves):
                 if game.state == "gameover":
                     break
             fitness += game.score
-        ai.fitness = fitness
+        ai.fitness = fitness/rounds
         
 
         

@@ -4,4 +4,5 @@ class AI:
         self.linesWeight = linesWeight
         self.holesWeight = holesWeight
         self.bumpinessWeight = bumpinessWeight
+        self.fitness = 0
     

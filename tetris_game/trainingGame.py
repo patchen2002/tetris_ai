@@ -1,5 +1,6 @@
 import pygame
 import random
+import ai
 import numpy as np
 # testing
 colors = [
@@ -75,6 +76,7 @@ class Tetris:
     def new_figure(self):
         self.figure = Figure(0, 0)
 
+    # checks if the piece is out of the board or filling up another piece
     def intersects(self):
         intersection = False
         for i in range(4):
@@ -87,6 +89,7 @@ class Tetris:
                         intersection = True
         return intersection
 
+    # check if any lines are full and breaks them
     def break_lines(self):
         lines = 0
         for i in range(1, self.height):
@@ -101,18 +104,21 @@ class Tetris:
                         self.field[i1][j] = self.field[i1 - 1][j]
         self.score += lines
 
+    #moves the block down as far as it can go
     def go_space(self):
         while not self.intersects():
             self.figure.y += 1
         self.figure.y -= 1
         self.freeze()
 
+    # simulates moving the block down to the furthest it goes
     def test_space(self):
         while not self.intersects():
             self.figure.y += 1
         self.figure.y -= 1
         return self.test_freeze()
 
+    # checks to see if there are any intersections, breaks lines, and fills in the board
     def freeze(self):
         for i in range(4):
             for j in range(4):
@@ -124,6 +130,7 @@ class Tetris:
         if self.intersects():
             self.state = "gameover"
 
+    # fills out the board and checks if the block is out of the board limits
     def test_freeze(self):
         for i in range(4):
             for j in range(4):
@@ -233,17 +240,19 @@ class Tetris:
         self.figure.x = best_move[0]
         self.go_space()
 
-def trainingGame(param1, param2, param3, param4, rounds, moves):
-    list = []
-    for i in range(rounds):
-        game = Tetris(20, 10)
-        game.new_figure()
-        for j in range(moves):
-            if game.state == "gameover":
-                break
-            game.best_moves(param1, param2, param3, param4)
-        list.append(game.score)
-    return list
+# takes in an array of AI objects, simulates the game with their parameter a certain number of rounds up to a certain number of moves
+def computeFitness(AIList, rounds, moves):
+    for ai in AIList:
+        fitness = 0
+        for i in range(rounds):
+            game = Tetris(20, 10)
+            game.new_figure()
+            for j in range(moves):
+                game.best_moves(ai.heightWeight, ai.bumpinessWeight, ai.linesWeight, ai.holesWeight)
+                if game.state == "gameover":
+                    break
+            fitness += game.score
+        ai.fitness = fitness
+        
 
-print(trainingGame(-1, -1, 1, -1, 10, 100))
         

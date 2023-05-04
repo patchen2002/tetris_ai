@@ -18,13 +18,13 @@ class Figure:
     y = 0
 
     figures = [
-        [np.array([1, 5, 9, 13]), np.array([4, 5, 6, 7])],
-        [np.array([4, 5, 9, 10]), np.array([2, 6, 5, 9])],
-        [np.array([6, 7, 9, 10]), np.array([1, 5, 6, 10])],
-        [np.array([1, 2, 5, 9]), np.array([0, 4, 5, 6]), np.array([1, 5, 9, 8]), np.array([4, 5, 6, 10])],
-        [np.array([1, 2, 6, 10]), np.array([5, 6, 7, 9]), np.array([2, 6, 10, 11]), np.array([3, 5, 6, 7])],
-        [np.array([1, 4, 5, 6]), np.array([1, 4, 5, 9]), np.array([4, 5, 6, 9]), np.array([1, 5, 6, 9])],
-        [np.array([1, 2, 5, 6])],
+        [np.array([0, 4, 8, 12, 1]), np.array([0, 1, 2, 3, 4])],
+        [np.array([4, 5, 9, 10, 3]), np.array([1, 5, 4, 8, 2])],
+        [np.array([5, 6, 8, 9, 3]), np.array([0, 4, 5, 9, 2])],
+        [np.array([0, 1, 4, 8, 2]), np.array([0, 4, 5, 6, 3]), np.array([1, 5, 9, 8, 2]), np.array([4, 5, 6, 10, 3])],
+        [np.array([0, 1, 5, 9, 2]), np.array([4, 5, 6, 8, 3]), np.array([0, 4, 8, 9, 2]), np.array([2, 4, 5, 6, 3])],
+        [np.array([1, 4, 5, 6, 3]), np.array([1, 4, 5, 9, 2]), np.array([4, 5, 6, 9, 3]), np.array([0, 4, 5, 8, 2])],
+        [np.array([0, 1, 4, 5, 2])],
     ]
 
     def __init__(self, x, y):
@@ -33,9 +33,10 @@ class Figure:
         self.type = random.randint(0, len(self.figures) - 1)
         self.color = random.randint(1, len(colors) - 1)
         self.rotation = 0
+        self.width = self.figures[self.type][self.rotation][4]
 
     def image(self):
-        return self.figures[self.type][self.rotation]
+        return self.figures[self.type][self.rotation][:4]
 
     def rotate(self, r):
         self.rotation = r
@@ -61,7 +62,7 @@ class Tetris:
         self.state = "start"
 
     def new_figure(self):
-        self.figure = Figure(3, 0)
+        self.figure = Figure(0, 0)
 
     def intersects(self):
         intersection = False
@@ -125,6 +126,60 @@ class Tetris:
             self.figure.rotation = old_rotation
 
     # Need to create: bumpiness, complete lines, aggregate height, holes, next_states
+    def bumpiness(self):
+        min_col = self.height
+        max_col = 1
+        for i in range(self.width):
+            h = self.height
+            while(h>1):
+                if(self.field[i][h] != 0):
+                    break
+                h -= 1
+            min_col = min(min_col, h)
+            max_col = max(max_col, h)
+        return max_col - min_col
+
+    def complete_lines(self):
+        lines = 0
+        for i in range(1, self.height):
+            zeros = 0
+            for j in range(self.width):
+                if self.field[i][j] == 0:
+                    zeros += 1
+            if zeros == 0:
+                lines += 1
+        return lines
+    
+    def aggregate_height(self):
+        agg_height = 0
+        for i in range(self.width):
+            h = self.height
+            while(h>1):
+                if(self.field[i][h] != 0):
+                    break
+                h -= 1
+            agg_height += h
+        return agg_height
+    
+    def holes(self):
+        heights = []
+        holes = 0
+        for i in range(self.width):
+            h = self.height
+            while(h>1):
+                if(self.field[i][h] != 0):
+                    break
+                h -= 1
+            heights.append(h)
+        for i in range(self.width):
+            for j in range(1, self.height):
+                if(self.field[i][j] == 0 and j < heights[i]):
+                    holes += 1
+        return holes
+        
+
+
+
 
 
 # Initialize the game engine

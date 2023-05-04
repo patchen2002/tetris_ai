@@ -5,4 +5,3 @@ class AI:
         self.holesWeight = holesWeight
         self.bumpinessWeight = bumpinessWeight
         self.fitness = 0
-    

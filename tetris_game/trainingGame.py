@@ -22,9 +22,12 @@ class Figure:
         [np.array([0, 4, 8, 12, 1]), np.array([0, 1, 2, 3, 4])],
         [np.array([4, 5, 9, 10, 3]), np.array([1, 5, 4, 8, 2])],
         [np.array([5, 6, 8, 9, 3]), np.array([0, 4, 5, 9, 2])],
-        [np.array([0, 1, 4, 8, 2]), np.array([0, 4, 5, 6, 3]), np.array([1, 5, 9, 8, 2]), np.array([4, 5, 6, 10, 3])],
-        [np.array([0, 1, 5, 9, 2]), np.array([4, 5, 6, 8, 3]), np.array([0, 4, 8, 9, 2]), np.array([2, 4, 5, 6, 3])],
-        [np.array([1, 4, 5, 6, 3]), np.array([1, 4, 5, 9, 2]), np.array([4, 5, 6, 9, 3]), np.array([0, 4, 5, 8, 2])],
+        [np.array([0, 1, 4, 8, 2]), np.array([0, 4, 5, 6, 3]),
+         np.array([1, 5, 9, 8, 2]), np.array([4, 5, 6, 10, 3])],
+        [np.array([0, 1, 5, 9, 2]), np.array([4, 5, 6, 8, 3]),
+         np.array([0, 4, 8, 9, 2]), np.array([2, 4, 5, 6, 3])],
+        [np.array([1, 4, 5, 6, 3]), np.array([1, 4, 5, 9, 2]),
+         np.array([4, 5, 6, 9, 3]), np.array([0, 4, 5, 8, 2])],
         [np.array([0, 1, 4, 5, 2])],
     ]
 
@@ -104,7 +107,7 @@ class Tetris:
                         self.field[i1][j] = self.field[i1 - 1][j]
         self.score += lines
 
-    #moves the block down as far as it can go
+    # moves the block down as far as it can go
     def go_space(self):
         while not self.intersects():
             self.figure.y += 1
@@ -140,7 +143,7 @@ class Tetris:
                         return False
                     self.field[i + self.figure.y][j +
                                                   self.figure.x] = self.figure.color
-                    
+
         return True
 
     # difference between max height column and min height column
@@ -149,8 +152,8 @@ class Tetris:
         max_col = 1
         for i in range(self.width):
             h = 0
-            while(h < self.height):
-                if(self.field[h][i] != 0):
+            while (h < self.height):
+                if (self.field[h][i] != 0):
                     break
                 h += 1
             min_col = min(min_col, h)
@@ -168,36 +171,36 @@ class Tetris:
             if zeros == 0:
                 lines += 1
         return lines
-    
+
     # total height
     def aggregate_height(self):
         agg_height = 0
         for i in range(self.width):
             h = 0
-            while(h < self.height):
-                if(self.field[h][i] != 0):
+            while (h < self.height):
+                if (self.field[h][i] != 0):
                     break
                 h += 1
             agg_height += self.height - h
         return agg_height
-    
+
     # how many squares are under blocks
     def holes(self):
         heights = []
         holes = 0
         for i in range(self.width):
             h = 0
-            while(h < self.height):
-                if(self.field[h][i] != 0):
+            while (h < self.height):
+                if (self.field[h][i] != 0):
                     break
                 h += 1
             heights.append(h)
         for i in range(self.width):
             for j in range(1, self.height):
-                if(self.field[j][i] == 0 and j > heights[i]):
+                if (self.field[j][i] == 0 and j > heights[i]):
                     holes += 1
         return holes
-    
+
     # creates a copy of the gamestate
     def clone(self, og):
         self.level = og.level
@@ -229,30 +232,32 @@ class Tetris:
                 curr.x = j
                 curr.y = 0
                 possible = background.test_space()
-                if(possible):
-                    curr_score = param1 * background.aggregate_height() + param2 * background.bumpiness() 
+                if (possible):
+                    curr_score = param1 * background.aggregate_height() + param2 * \
+                        background.bumpiness()
                     + param3 * background.complete_lines() + param4 * background.holes()
-                    if(curr_score >= max_score):
+                    if (curr_score >= max_score):
                         max_score = curr_score
                         best_move = [j, i]
-        
+
         self.figure.rotate(best_move[1])
         self.figure.x = best_move[0]
         self.go_space()
 
 # takes in an array of AI objects, simulates the game with their parameter a certain number of rounds up to a certain number of moves
+
+
 def computeFitness(AIList, rounds, moves):
     for ai in AIList:
-        fitness = 0
+        fitness = 1
         for i in range(rounds):
             game = Tetris(20, 10)
             game.new_figure()
             for j in range(moves):
-                game.best_moves(ai.heightWeight, ai.bumpinessWeight, ai.linesWeight, ai.holesWeight)
+                game.best_moves(ai.heightWeight, ai.bumpinessWeight,
+                                ai.linesWeight, ai.holesWeight)
                 if game.state == "gameover":
                     break
             fitness += game.score
+        # print("fitness", fitness)
         ai.fitness = fitness/rounds
-        
-
-        

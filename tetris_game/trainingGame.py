@@ -31,10 +31,10 @@ class Figure:
         [np.array([0, 1, 4, 5, 2])],
     ]
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, type):
         self.x = x
         self.y = y
-        self.type = random.randint(0, len(self.figures) - 1)
+        self.type = type
         self.color = random.randint(1, len(colors) - 1)
         self.forms = len(self.figures[self.type])
         self.rotation = 0
@@ -69,6 +69,8 @@ class Tetris:
         self.y = 60
         self.zoom = 20
         self.figure = None
+        self.cycle = random.sample(range(0, 7), 7)
+        self.curr_figure = 0
 
         self.height = height
         self.width = width
@@ -77,7 +79,11 @@ class Tetris:
         self.state = "start"
 
     def new_figure(self):
-        self.figure = Figure(0, 0)
+        self.figure = Figure(0, 0, self.cycle[self.curr_figure])
+        self.curr_figure += 1
+        if(self.curr_figure > 6):
+            self.curr_figure = 0
+            self.cycle = random.sample(range(0, 7), 7)
 
     # checks if the piece is out of the board or filling up another piece
     def intersects(self):
@@ -138,7 +144,7 @@ class Tetris:
         for i in range(4):
             for j in range(4):
                 if i * 4 + j in self.figure.image():
-                    if i + self.figure.y < 0 or i + self.figure.y >= self.height \
+                    if i + self.figure.y < 1 or i + self.figure.y >= self.height \
                        or j + self.figure.x < 0 or j + self.figure.x >= self.width:
                         return False
                     self.field[i + self.figure.y][j +
@@ -146,19 +152,21 @@ class Tetris:
 
         return True
 
-    # difference between max height column and min height column
+    # difference between adjacent column
     def bumpiness(self):
-        min_col = self.height
-        max_col = 1
+        heights = []
+        bumpiness = 0
         for i in range(self.width):
             h = 0
-            while (h < self.height):
-                if (self.field[h][i] != 0):
+            while(h < self.height):
+                if(self.field[h][i] != 0):
                     break
                 h += 1
-            min_col = min(min_col, h)
-            max_col = max(max_col, h)
-        return max_col - min_col
+            heights.append(h)
+        
+        for i in range(len(heights)-1):
+            bumpiness += abs(heights[i] - heights[i+1])
+        return bumpiness
 
     # determines how many lines are complete
     def complete_lines(self):
@@ -213,7 +221,7 @@ class Tetris:
         self.y = og.y
         self.zoom = og.zoom
 
-        self.figure = Figure(0, 0)
+        self.figure = Figure(0, 0, 0)
         self.figure.clone(og.figure)
 
     # for a given gamestate and figure, figures out the best possible move for every rotation and location
@@ -261,3 +269,17 @@ def computeFitness(AIList, rounds, moves):
             fitness += game.score
         # print("fitness", fitness)
         ai.fitness = fitness/rounds
+
+def computeFitnessTest(p1, p2, p3, p4, rounds, moves):
+    list = []
+    for i in range(rounds):
+        game = Tetris(20, 10)
+        game.new_figure()
+
+        for j in range(moves):
+            game.best_moves(p1, p2, p3, p4)
+            if game.state == "gameover":
+                break
+        list.append(game.score)
+    return list
+

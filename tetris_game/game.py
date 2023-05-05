@@ -10,6 +10,7 @@ colors = [
     (80, 134, 22),
     (180, 34, 22),
     (180, 34, 122),
+    (115, 225, 60),
 ]
 
 
@@ -27,10 +28,10 @@ class Figure:
         [np.array([0, 1, 4, 5, 2])],
     ]
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, type):
         self.x = x
         self.y = y
-        self.type = random.randint(0, len(self.figures) - 1)
+        self.type = type
         self.color = random.randint(1, len(colors) - 1)
         self.forms = len(self.figures[self.type])
         self.rotation = 0
@@ -65,16 +66,21 @@ class Tetris:
         self.y = 60
         self.zoom = 20
         self.figure = None
+        self.cycle = random.sample(range(0, 7), 7)
+        self.curr_figure = 0
 
         self.height = height
         self.width = width
         self.field = np.zeros((height, width))
         self.score = 0
-        self.state = "start"
 
     def new_figure(self):
-        self.figure = Figure(0, 0)
-        self.best_moves(-1, -1, 1, -1)
+        self.figure = Figure(0, 0, self.cycle[self.curr_figure])
+        self.curr_figure += 1
+        if(self.curr_figure > 6):
+            self.curr_figure = 0
+            self.cycle = random.sample(range(0, 7), 7)
+        self.best_moves(-0.510066, -0.0184483, 0.760666, -0.35663, 0.5)
 
     def intersects(self):
         intersection = False
@@ -100,7 +106,7 @@ class Tetris:
                 for i1 in range(i, 1, -1):
                     for j in range(self.width):
                         self.field[i1][j] = self.field[i1 - 1][j]
-        self.score += lines
+        self.score += lines**2
 
     def go_space(self):
         while not self.intersects():
@@ -137,7 +143,7 @@ class Tetris:
         for i in range(4):
             for j in range(4):
                 if i * 4 + j in self.figure.image():
-                    if i + self.figure.y < 0 or i + self.figure.y >= self.height \
+                    if i + self.figure.y < 1 or i + self.figure.y >= self.height \
                        or j + self.figure.x < 0 or j + self.figure.x >= self.width:
                         return False
                     self.field[i + self.figure.y][j +
@@ -145,19 +151,22 @@ class Tetris:
                     
         return True
 
-    # difference between max height column and min height column
+    # difference between adjacent column
     def bumpiness(self):
-        min_col = self.height
-        max_col = 1
+        heights = []
+        bumpiness = 0
         for i in range(self.width):
             h = 0
             while(h < self.height):
                 if(self.field[h][i] != 0):
                     break
                 h += 1
-            min_col = min(min_col, h)
-            max_col = max(max_col, h)
-        return max_col - min_col
+            heights.append(h)
+        
+        for i in range(len(heights)-1):
+            bumpiness += abs(heights[i] - heights[i+1])
+
+        return bumpiness
 
     # determines how many lines are complete
     def complete_lines(self):
@@ -194,11 +203,23 @@ class Tetris:
                     break
                 h += 1
             heights.append(h)
+
         for i in range(self.width):
             for j in range(1, self.height):
                 if(self.field[j][i] == 0 and j > heights[i]):
                     holes += 1
         return holes
+    
+    def right_col(self):
+        total = 0
+        if self.figure != 0 and self.figure.rotation != 1:
+            for h in range(1, self.height):
+                if self.field[h][9] == 0:
+                    total += 1
+        else:
+            if self.figure.x == 9:
+                total -= 4
+        return total
     
     # creates a copy of the gamestate
     def clone(self, og):
@@ -212,11 +233,11 @@ class Tetris:
         self.y = og.y
         self.zoom = og.zoom
 
-        self.figure = Figure(0, 0)
+        self.figure = Figure(0, 0, 0)
         self.figure.clone(og.figure)
 
     # for a given gamestate and figure, figures out the best possible move for every rotation and location
-    def best_moves(self, param1, param2, param3, param4):
+    def best_moves(self, param1, param2, param3, param4, param5):
         forms = self.figure.forms
         background = Tetris(20, 10)
         background.clone(self)
@@ -233,11 +254,11 @@ class Tetris:
                 possible = background.test_space()
                 if(possible):
                     curr_score = param1 * background.aggregate_height() + param2 * background.bumpiness() 
-                    + param3 * background.complete_lines() + param4 * background.holes()
-                    if(curr_score >= max_score):
+                    + param3 * background.complete_lines() + param4 * background.holes() + param5 * self.right_col()
+                    if(curr_score > max_score):
                         max_score = curr_score
                         best_move = [j, i, curr.y]
-        
+
         self.figure.rotate(best_move[1])
         self.figure.x = best_move[0]
         self.figure.y = best_move[2]

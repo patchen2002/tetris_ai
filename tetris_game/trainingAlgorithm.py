@@ -17,21 +17,28 @@ class trainingAlgorithm:
         ai.bumpinessWeight /= norm
 
     def generateNewAi():
-        newAI = ai.AI(random.random(),
-                      random.random(),
-                      random.random(),
-                      random.random())
+        newAI = ai.AI(random.random()*2-1,
+                      random.random()*2-1,
+                      random.random()*2-1,
+                      random.random()*2-1)
         trainingAlgorithm.normalize(newAI)
         return newAI
 
+    def generateOldAi():
+        oldAi = ai.AI(-0.550640755084,
+                      0.301200234921,
+                      -0.724338713385,
+                      -0.285318428453)
+        trainingAlgorithm.normalize(oldAi)
+        return oldAi
+
     def sort(allAi):
-        sorted(allAi, key=lambda ai: ai.fitness, reverse=True)
+        return sorted(allAi, key=lambda ai: ai.fitness, reverse=True)
 
     def tournamentSelect(allAi):
-        indices = np.random.choice(len(allAi)-1, 3, replace=False)
+        indices = np.random.choice(len(allAi)-1, len(allAi)//3, replace=False)
 
         indices = np.sort(indices)
-
         return [allAi[indices[0]], allAi[indices[1]]]
 
     def crossOver(ai1, ai2):
@@ -46,7 +53,7 @@ class trainingAlgorithm:
         return newAI
 
     def mutate(ai):
-        mutate = random.random()*.4-0.2
+        mutate = random.random()*.7-0.7
         randomNum = random.randint(0, 3)
         if randomNum == 0:
             ai.heightWeight += mutate
@@ -58,46 +65,50 @@ class trainingAlgorithm:
             ai.bumpinessWeight += mutate
 
     def deleteAndReplace(allAi, newAi):
-        allAi[:len(allAi) - len(newAi)]
+
+        allAi = allAi[:len(allAi) - len(newAi)]
         allAi = np.append(allAi, newAi)
-        trainingAlgorithm.sort(allAi)
+        allAi = trainingAlgorithm.sort(allAi)
         return allAi
 
     def training(population, rounds, maxMoves):
         allAi = []
-        for i in range(population):
+        for i in range(population-1):
             allAi.append(trainingAlgorithm.generateNewAi())
 
-        print("finish initial population")
+        # ADD PREVIOUS OPTIMAL TO SHORTCUT SLOW INITIAL TRAINING
+        allAi.append(trainingAlgorithm.generateOldAi())
 
         trainingGame.computeFitness(
             allAi, rounds, maxMoves)  # Patrick implements
-        print("finishd fitness test")
-        trainingAlgorithm.sort(allAi)
+        allAi = trainingAlgorithm.sort(allAi)
 
+        iter = 1
         while True:
             newAi = []
-            for i in range(30):
+            for i in range(population//3):
 
                 parents = trainingAlgorithm.tournamentSelect(allAi)
                 # print('fitnesses = ' +
                 #   str(parents[0].fitness) + ',' + str(parents[1].fitness))
 
                 child = trainingAlgorithm.crossOver(parents[0], parents[1])
-                if random.random() < 0.05:
+                if random.random() < .5:
                     trainingAlgorithm.mutate(child)
                 newAi.append(child)
 
             trainingGame.computeFitness(
                 newAi, rounds, maxMoves)  # Patrick implements
-            trainingAlgorithm.deleteAndReplace(allAi, newAi)
-            trainingAlgorithm.sort(allAi)
+            allAi = trainingAlgorithm.deleteAndReplace(allAi, newAi)
+            allAi = trainingAlgorithm.sort(allAi)
             totalFitness = 0
             for ai in allAi:
                 totalFitness += ai.fitness
+            print("Iteration: ", iter)
             print("Average Fitness: ", totalFitness/len(allAi))
             print("Best AI: ")
             pprint(vars(allAi[0]))
+            iter += 1
 
 
-trainingAlgorithm.training(100, 2, 100)
+trainingAlgorithm.training(15, 1, 1000)

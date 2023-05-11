@@ -111,4 +111,4 @@ class trainingAlgorithm:
             iter += 1
 
 
-trainingAlgorithm.training(15, 1, 1000)
+trainingAlgorithm.training(100, 10, 1000)

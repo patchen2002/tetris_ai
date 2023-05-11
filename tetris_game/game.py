@@ -80,7 +80,7 @@ class Tetris:
         if(self.curr_figure > 6):
             self.curr_figure = 0
             self.cycle = random.sample(range(0, 7), 7)
-        self.best_moves(-0.510066, -0.0184483, 0.760666, -0.35663, 0.5)
+        self.best_moves(-0.510066, -0.0184483, 0.760666, -0.35663)
 
     def intersects(self):
         intersection = False
@@ -237,7 +237,7 @@ class Tetris:
         self.figure.clone(og.figure)
 
     # for a given gamestate and figure, figures out the best possible move for every rotation and location
-    def best_moves(self, param1, param2, param3, param4, param5):
+    def best_moves(self, param1, param2, param3, param4):
         forms = self.figure.forms
         background = Tetris(20, 10)
         background.clone(self)
@@ -252,9 +252,9 @@ class Tetris:
                 curr.x = j
                 curr.y = 0
                 possible = background.test_space()
-                if(possible):
+                if(possible): 
                     curr_score = param1 * background.aggregate_height() + param2 * background.bumpiness() 
-                    + param3 * background.complete_lines() + param4 * background.holes() + param5 * self.right_col()
+                    + param3 * background.complete_lines() + param4 * background.holes()
                     if(curr_score > max_score):
                         max_score = curr_score
                         best_move = [j, i, curr.y]

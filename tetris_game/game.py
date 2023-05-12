@@ -80,7 +80,7 @@ class Tetris:
         if(self.curr_figure > 6):
             self.curr_figure = 0
             self.cycle = random.sample(range(0, 7), 7)
-        self.best_moves(-0.510066, -0.0184483, 0.760666, -0.35663)
+        self.best_moves(-0.8056543996894932, -0.1384432019617636, 0.18947687725172874, 0.09460511791200547)
 
     def intersects(self):
         intersection = False
@@ -106,7 +106,7 @@ class Tetris:
                 for i1 in range(i, 1, -1):
                     for j in range(self.width):
                         self.field[i1][j] = self.field[i1 - 1][j]
-        self.score += lines**2
+        self.score += lines
 
     def go_space(self):
         while not self.intersects():
@@ -209,17 +209,6 @@ class Tetris:
                 if(self.field[j][i] == 0 and j > heights[i]):
                     holes += 1
         return holes
-    
-    def right_col(self):
-        total = 0
-        if self.figure != 0 and self.figure.rotation != 1:
-            for h in range(1, self.height):
-                if self.field[h][9] == 0:
-                    total += 1
-        else:
-            if self.figure.x == 9:
-                total -= 4
-        return total
     
     # creates a copy of the gamestate
     def clone(self, og):

@@ -1,4 +1,5 @@
 # Tetris AI
+<img src="https://github.com/patchen2002/tetris_ai/blob/main/tetris_sc.png" width="1000" />
 
 Created in May 2023
 

@@ -21,7 +21,7 @@ Requirements: Python and Pygame
 2. Navigate into the tetris_game directory
 3. If you want to run our AI model to simulate a new set of parameters
     - Open the trainingAlgorithm.py file
-    - On the last line, find the trainingAlgorithm.training function. It should have three parameters. These parameters are, in order: number of bots, number of games, and maximum number of moves per game. Fill in whatever numbers you want
+    - On the last line, find the trainingAlgorithm.training function.() It should have three parameters. These parameters are, in order: number of bots, number of games, and maximum number of moves per game. Fill in whatever numbers you want
     - Run the command `python3 trainingAlgorithm.py`. Every iteration, it should print out information about the fitness and what the best parameters were
 4. If you want to watch the bot at work
     - Open the game.py file and go to line 83. There, you can fill in the four parameters you got from step three(or leave them as is). The order of the parameters is: aggregate height, bumpiness, complete lines, and holes
